@@ -1,0 +1,15 @@
+# Process this file with autoconf to produce a pkg-config metadata file.
+
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: VBR (Vouch by reference library)
+Description: Library for assisting in Vouch By Refence functions
+URL: http://opendkim.org
+Version: 2.10.3
+Libs: -L${libdir} -lvbr
+Libs.private: 
+Cflags: -I${includedir}
+

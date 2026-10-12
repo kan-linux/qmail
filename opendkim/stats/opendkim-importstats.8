@@ -1,0 +1,91 @@
+.TH opendkim-importstats 8 "The Trusted Domain Project"
+.SH NAME
+.B opendkim-importstats
+\- OpenDKIM statistics import tool
+.SH SYNOPSIS
+.B opendkim-importstats
+[options]
+.SH DESCRIPTION
+.B opendkim-importstats
+imports collected OpenDKIM operational statistics into an SQL database.
+Statistics are collected by the
+.I opendkim(8)
+filter into a local file and can be output in a tabulated format by the
+.I opendkim-stats(8)
+tool.  See their respective manual pages for further information.
+
+The same file is used as the input to this program, which processes it for
+insertion into an SQL database.  The data are expected on standard input.
+.SH OPTIONS
+Long option names may be available depending on the compile-time environment
+for the tool.
+
+.TP
+.I \-d name
+(or \-\-dbname=name)
+Specifies the name of the SQL database into which records should be
+imported.  The default is
+.I opendkim.
+.TP
+.I \-E
+Abort on certain errors, such as unknown input record types, improper field
+counts, etc., rather than continuing.
+.TP
+.I \-F
+When a malformed line is detected in the input, write the parsed data to
+standard error.
+.TP
+.I \-h host
+(or \-\-dbhost=host)
+Names the host to which an SQL connection should be made.  The default is
+"localhost".
+.TP
+.I \-m
+Input is in the form of an email message, so do not start processing input
+until a blank line is encountered.
+.TP
+.I \-P port
+(or \-\-dbport=port)
+Names the port to which an SQL connection should be made.  The default is
+determined by the scheme in use (see below).
+.TP
+.I \-p password
+(or \-\-dbpasswd=password)
+Specifies the password that should be used to authenticate to the SQL
+database.  The default is no password.
+.TP
+.I \-r
+Don't automatically add unknown reporters to the database.
+.TP
+.I \-S
+Don't skip duplicate message records and their associated signatures.
+.TP
+.I \-s scheme
+(or \-\-dbscheme=scheme)
+Specifies the SQL scheme (backend) to be used to access the SQL database
+database.  The default is "mysql".
+.TP
+.I \-u user
+(or \-\-dbuser=user)
+Specifies the user that should be used to authenticate to the SQL
+database.  The default is
+.I opendkim.
+.TP
+.I \-v
+Increase verbosity of the output.
+.TP
+.I \-x
+Apply schema extension records.
+.SH VERSION
+This man page covers the version of
+.I opendkim-importstats
+that shipped with version 2.10.3 of
+.I OpenDKIM.
+.SH COPYRIGHT
+Copyright (c) 2010-2012, 2015, The Trusted Domain Project.
+All rights reserved.
+.SH SEE ALSO
+.I opendkim(8),
+.I opendkim.conf(5)
+.P
+RFC6376 - DomainKeys Identified Mail

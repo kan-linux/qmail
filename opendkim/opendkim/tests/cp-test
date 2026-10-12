@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# small tool to copy a test case
+
+# XXX TODO arg 3 should be a description approprately inserted to the files
+
+if [ $# -lt 2 ]
+then
+	echo requires more parameters
+	echo usage: $0 fromtestcasename totestcasename
+	exit 1
+fi
+for a in $1 $1.*;
+do
+	dest=${a/$1/$2}
+	echo copying $a to $dest
+	sed -e s/$1/$2/g  $a >  $dest
+done
+chmod a+x $2

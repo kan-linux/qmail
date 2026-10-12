@@ -1,0 +1,59 @@
+-t
+-fpostmaster@example.org
+From: "Mail Admin" <postmaster@example.org>
+To: dkim-feedbacks@example.com
+Bcc: postmaster@example.net, tom@example.net, "hary" <hary@example.net>
+Subject: DKIM failure report for t-verify-report
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=feedback-report;
+	boundary="dkimreport/unknown-host/t-verify-report"
+--dkimreport/unknown-host/t-verify-report
+Content-Type: text/plain
+
+DKIM failure report for job t-verify-report on unknown-host
+
+The canonicalized form of the failed message's header and body are
+attached.
+
+--dkimreport/unknown-host/t-verify-report
+Content-Type: message/feedback-report
+
+User-Agent: OpenDKIM-Filter/2.3.1
+Version: 0.1
+Original-Envelope-Id: t-verify-report
+Original-Mail-From: user@example.com
+Reporting-MTA: unknown-host
+Source-IP: 127.0.0.1
+Message-ID: <184510.abcdefg@example.com>
+Arrival-Date: Mon, 14 Mar 2011 16:41:35 -0700
+Reported-Domain: example.com
+Delivery-Result: other
+Feedback-Type: auth-failure
+Auth-Failure: signature (signature verification failed)
+DKIM-Failure: signature
+DKIM-Domain: example.com
+DKIM-Selector: test
+DKIM-Identity: @example.com
+DKIM-Canonicalized-Header: RnJvbTogdXNlckBleDRtcGxlLmNvbQ0KRGF0ZTogVHVl
+    LCAyMiBEZWMgMjAwOSAxMzowNDoxMiAtMDgwMA0KU3ViamVjdDogU2lnbmluZyB0ZXN0
+    DQpES0lNLVNpZ25hdHVyZTogdj0xOyBhPXJzYS1zaGEyNTY7IGM9c2ltcGxlL3NpbXBs
+    ZTsgZD1leGFtcGxlLmNvbTsgcz10ZXN0Ow0KCXQ9MTMyOTExMzQxMjsgcj15OyBiaD0z
+    VldHUUdZK2NTTllkMU1HTStYNmhSWFUwc3RsOEpDYVF0bDRtYlgvajJJPTsNCgloPUZy
+    b206RGF0ZTpTdWJqZWN0Ow0KCWI9
+DKIM-Canonicalized-Body: VGhpcyBpcyBhIHRlc3QhDQo=
+
+--dkimreport/unknown-host/t-verify-report
+Content-Type: text/rfc822-headers
+
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=example.com; s=test;
+	t=1329113412; r=y; bh=3VWGQGY+cSNYd1MGM+X6hRXU0stl8JCaQtl4mbX/j2I=;
+	h=From:Date:Subject;
+	b=J4DYccKlZx8+EFXvnUEZyiQn2JNpQ0JSvTT1PeyGfrYPAux//SHXb/K/Z6jYzqH5z
+	 ZkiQ5UutfDjkkW2WsRCilkvodnp0PGrLK5fDFHBK7vGTLzXyhI/zubkeYVZufd+9U7
+	 kuVE9jz2Vb4YDL8DC9EZJ5SyAY8uNnsrky8gQ948=
+From: user@ex4mple.com
+Date: Tue, 22 Dec 2009 13:04:12 -0800
+Subject: Signing test
+Message-ID: <184510.abcdefg@example.com>
+
+--dkimreport/unknown-host/t-verify-report--

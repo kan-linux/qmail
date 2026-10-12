@@ -1,0 +1,30 @@
+{
+	"always": [
+		"--with-openssl=/usr/local",
+		"--with-milter=/usr/local"
+	],
+
+	"combine": [
+		"--enable-debug",
+		"--disable-shared",
+		"--with-odbx",
+		[
+			"--enable-rbl",
+			"--enable-stats",
+ 			"--enable-statsext",
+			"--with-lua"
+		],
+		"--enable-diffheaders",
+		"--enable-vbr",
+		"--enable-atps",
+		"--enable-poll",
+		"--with-unbound",
+		"--enable-replace_rules",
+		"--with-libmemcached",
+		"--enable-rate_limit",
+		"--enable-reputation",
+		"--enable-dkim_reputation",
+		"--with-openldap",
+		"--enable-resign"
+	]
+}

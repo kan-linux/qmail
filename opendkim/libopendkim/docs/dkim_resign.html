@@ -1,0 +1,119 @@
+<html>
+<head><title>dkim_resign()</title></head>
+<body>
+<!--
+-->
+<h1>dkim_resign()</h1>
+<p align="right"><a href="index.html">[back to index]</a></p>
+
+<table border="0" cellspacing=4 cellpadding=4>
+<!---------- Synopsis ----------->
+<tr><th valign="top" align=left width=150>SYNOPSIS</th><td>
+<pre>
+#include &lt;dkim.h&gt;
+
+<a href="dkim_stat.html"><tt>DKIM_STAT</tt></a> dkim_resign(
+	<a href="dkim.html"><tt>DKIM</tt></a> *sh,
+	<a href="dkim.html"><tt>DKIM</tt></a> *eh,
+	bool hdrbind
+);
+</pre>
+Binds a signing handle to another handle to generate a second signature for
+a message being signed or verified.  The message therefore only passes through
+the library once, but now produces either a verification result and a new
+signature, or multiple signatures.
+</td></tr>
+
+<!----------- Description ---------->
+<tr><th valign="top" align=left>DESCRIPTION</th><td>
+<table border="1" cellspacing=1 cellpadding=4>
+<tr align="left" valign=top>
+<th width="80">Called When</th>
+<td><tt>dkim_resign()</tt> must be called after a signing handle is acquired
+    with <a href="dkim_sign.html"><tt>dkim_sign()</tt></a> and a separate
+    (signing or verifying) handle is acquired with
+    <tt>dkim_sign()</tt> or
+    <a href="dkim_verify.html"><tt>dkim_verify()</tt></a>, but before
+    any message data has been passed to either one. </td>
+</tr>
+</table>
+
+<!----------- Arguments ---------->
+<tr><th valign="top" align=left>ARGUMENTS</th><td>
+    <table border="1" cellspacing=0>
+    <tr bgcolor="#dddddd"><th>Argument</th><th>Description</th></tr>
+    <tr valign="top"><td>sh</td>
+	<td>Message-specific handle, returned by
+        <a href="dkim_sign.html"><tt>dkim_sign()</tt></a>.  It must not
+	have been used to process any message data (i.e., no prior calls to
+	<a href="dkim_header.html"><tt>dkim_header()</tt></a> or
+	<a href="dkim_eoh.html"><tt>dkim_eoh()</tt></a>.
+	</td></tr>
+    <tr valign="top"><td>eh</td>
+	<td>Message-specific handle, returned by
+        <a href="dkim_sign.html"><tt>dkim_sign()</tt></a> or
+        <a href="dkim_verify.html"><tt>dkim_verify()</tt></a>.
+	<a href="dkim_eoh.html"><tt>dkim_eoh()</tt></a> must not already have
+	been called. </td>
+	</td></tr>
+    <tr valign="top"><td>hdrbind</td>
+	<td>If TRUE, indicates that both the header and the body of the
+	message are bound to the verifying handle.  If FALSE, only the body
+	is bound, meaning the caller must provide a complete (but possibly
+	different) set of header fields using
+	<a href="dkim_header.html"><tt>dkim_header()</tt></a>
+	prior to calling <a href="dkim_eoh.html"><tt>dkim_eoh()</tt></a>.
+	</td></tr>
+    </table>
+</td></tr>
+
+<!----------- Return Values ---------->
+<tr><th valign="top" align=left>RETURN VALUES</th><td>
+    <table border="1" cellspacing=0>
+    <tr bgcolor="#dddddd"><th>Value</th><th>Description</th></tr>
+    <tr valign="top"><td><tt>DKIM_STAT_OK</tt></td>
+	<td>The binding was successful.
+	</td></tr>
+    <tr valign="top"><td><tt>DKIM_STAT_INVALID</tt></td>
+	One or more of the following:
+	<ul>
+	 <li> <tt>sh</tt> is not a signing handle
+	 <li> <tt>eh</tt> has already been passed to
+	      <a href="dkim_eoh.html"><tt>dkim_eoh()</tt></a>
+	 <li> <tt>eh</tt> is already bound to another handle by a previous
+	      call to this function
+	</ul>
+	</td></tr>
+    </table>
+</td></tr>
+
+<!----------- Notes ---------->
+<tr>
+<th valign="top" align=left>NOTES</th> 
+<td>
+<ul>
+<li>Once the binding is made, passing <tt>eh</tt> to
+    <a href="dkim_free.html"><tt>dkim_free()</tt> will fail until <tt>sh</tt>
+    has been freed
+<li>Multiple signing handles may be bound to a common verifying handle
+<li><tt>eh</tt> should be passed to
+    <a href="dkim_eom.html"><tt>dkim_eom()</tt> before <tt>sh</tt> is, after
+    which the new signature can be extracted from <tt>sh</tt>; passing
+    <tt>sh</tt> to <tt>dkim_eom()</tt> before doing so with <tt>eh</tt>
+    will cause that function to return a status of <tt>DKIM_STAT_INVALID</tt>
+</ul>
+</td>
+</tr>
+</table>
+
+<hr size="1">
+<font size="-1">
+Copyright (c) 2009, 2010, 2012, The Trusted Domain Project.
+All rights reserved.
+
+<br>
+By using this file, you agree to the terms and conditions set
+forth in the license.
+</font>
+</body>
+</html>

@@ -1,0 +1,30 @@
+.TH OPENDKIM-STATS 8 "The Trusted Domain Project"
+.SH NAME
+.B opendkim-stats
+\- output opendkim statistics
+.SH SYNOPSIS
+.B opendkim-stats
+.I file
+.SH DESCRIPTION
+The
+.B opendkim-stats
+utility reads from an
+.I opendkim
+statistics database and dumps the data therein to standard output.  It takes as
+its only argument the path to this database.  The
+.I opendkim
+statistics gathering is disabled by default, but can be enabled through a
+.I Statistics
+entry in
+.I @SYSCONFDIR@/opendkim.conf.
+
+See the
+.I opendkim.conf(5)
+man page for details.
+.SH SEE ALSO
+.I opendkim(8), opendkim.conf(5)
+.SH VERSION
+This man page covers the
+.I opendkim-stats
+that shipped with version @VERSION@ of
+.I OpenDKIM.

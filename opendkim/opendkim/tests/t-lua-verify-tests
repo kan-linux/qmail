@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# 
+# Lua tests
+
+if [ x"$srcdir" = x"" ]
+then
+	srcdir=`pwd`
+fi
+
+../../miltertest/miltertest $MILTERTESTFLAGS -s $srcdir/t-lua-verify-tests.lua

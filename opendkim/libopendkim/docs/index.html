@@ -1,0 +1,694 @@
+<html>
+<head>
+<title>OpenDKIM Library (libopendkim)</title>
+</head>
+<body>
+<!--
+-->
+
+<h1>OpenDKIM Library (libopendkim)</h1>
+
+<h2>Introduction</h2>
+
+<b>DomainKeys Identified Mail</b> ("DKIM") is a specification for signing
+messages at the domain level using simple cryptographic methods to indicate
+that the signing domain accepts some responsibility for the message.  While
+the most obvious application of this is to defend against forged mail,
+other applications can make use of this capability. <p>
+
+DKIM is an amalgamation of DomainKeys, created by Yahoo!, Inc., and
+Internet Identified Mail (IIM) created by Cisco, Inc.  Both can be found
+as historical RFCs documents via the IETF web sites.  More information
+about DomainKeys can be found
+<a href="http://antispam.yahoo.com/domainkeys">here</a>. <p>
+
+This API (<tt>libopendkim</tt>) allows an application to sign or verify
+messages according to the <b>DKIM</b> proposed standard.  It also includes
+a number of extensions to support other protocols that are not part of
+DKIM itself.  Support is included for ADSP, a mechanism for determining
+whether or not the purported author domain claims all of its mail is signed.
+Also provided is an implementation of a filter, using Sendmail's <b>milter</b>
+package, that uses <tt>libopendkim</tt> to implement this facility. <p>
+
+<h2>Data Types</h2>
+
+<table columns="2" border="1">
+ <tr>
+  <td> <b> Data Type </b> </td>
+  <td> <b> Description </b> </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim.html"> <tt>DKIM</tt> </a> </td>
+  <td> A signing/verifying context for a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_alg_t.html"> <tt>dkim_alg_t</tt> </a> </td>
+  <td> A signature generation/verification method. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_atps_t.html"> <tt>dkim_atps_t</tt> </a> </td>
+  <td> An Authorized Third-Party Signer test result. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_canon_t.html"> <tt>dkim_canon_t</tt> </a> </td>
+  <td> A canonicalization method. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_cbstat.html"> <tt>DKIM_CBSTAT</tt> </a> </td>
+  <td> Return value/status from user-provided callbacks. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dnssec.html"> <tt>DKIM_DNSSEC</tt> </a> </td>
+  <td> Key record security evaluation codes. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_lib.html"> <tt>DKIM_LIB</tt> </a> </td>
+  <td> An instance of the <tt>libopendkim</tt> service. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_param_t.html"> <tt>dkim_param_t</tt> </a> </td>
+  <td> A signature parameter. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_query_t.html"> <tt>dkim_query_t</tt> </a> </td>
+  <td> A key query method. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_queryinfo.html"> <tt>DKIM_QUERYINFO</tt> </a> </td>
+  <td> A handle describing a required DNS query. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sigerror.html"> <tt>DKIM_SIGERROR</tt> </a> </td>
+  <td> Signature evaluation error codes. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_siginfo.html"> <tt>DKIM_SIGINFO</tt> </a> </td>
+  <td> Private handle referencing information about a particular signature
+       on a signed message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sigkey_t.html"> <tt>dkim_sigkey_t</tt> </a> </td>
+  <td> Private key data. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_stat.html"> <tt>DKIM_STAT</tt> </a> </td>
+  <td> Return value/status. </td>
+ </tr>
+</table>
+
+<h2>Functions</h2>
+
+<table columns="2" border="1">
+ <tr>
+  <td> <b> Function </b> </td>
+  <td> <b> Description </b> </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Administration</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_init.html"> <tt>dkim_init()</tt> </a> </td>
+  <td> Initialize an instance of the <b>DKIM</b> service. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_flush_cache.html"> <tt>dkim_flush_cache()</tt> </a> </td>
+  <td> Flush the key cache. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getcachestats.html"> <tt>dkim_getcachestats()</tt> </a> </td>
+  <td> Retrieve caching statistics. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_geterror.html"> <tt>dkim_geterror()</tt> </a> </td>
+  <td> Retrieve the most recent internal error message associated with a
+       DKIM handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getmode.html"> <tt>dkim_getmode()</tt> </a> </td>
+  <td> Return the mode (signing or verifying) of a DKIM handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_get_signer.html"> <tt>dkim_get_signer()</tt> </a> </td>
+  <td> Retrieve the current message signer (if any). </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_get_user_context.html"> <tt>dkim_get_user_context()</tt> </a> </td>
+  <td> Retrieve a specific user context pointer for a sign or verify operation
+       previously set by a call to <tt>dkim_set_user_context()</tt>. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_libfeature.html"> <tt>dkim_libfeature()</tt> </a> </td>
+  <td> Test for availability of a particular feature in the library. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_libversion.html"> <tt>dkim_libversion()</tt> </a> </td>
+  <td> Retrieve the version of libopendkim against which the application
+       is linked. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_dns_callback.html"> <tt>dkim_set_dns_callback()</tt> </a> </td>
+  <td> Request a call back into the main program from time to time while
+       waiting for DNS results. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_final.html"> <tt>dkim_set_final()</tt> </a> </td>
+  <td> Provide a function to perform final signature analysis and/or
+       re-ordering during verifications. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_key_lookup.html"> <tt>dkim_set_key_lookup()</tt> </a> </td>
+  <td> Provide a function to perform key lookups, replacing the internal
+       implementation.  Includes support for asynchronous operation. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_prescreen.html"> <tt>dkim_set_prescreen()</tt> </a> </td>
+  <td> Provide a function to perform signature prescreening and/or
+       re-ordering during verifications. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_signature_handle.html"> <tt>dkim_set_signature_handle()</tt> </a> </td>
+  <td> Provide a function to allocate a user-side signature description
+       structure and return a pointer to it. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_signature_handle_free.html"> <tt>dkim_set_signature_handle_free()</tt> </a> </td>
+  <td> Provide a function to deallocate a user-side signature description
+       structure. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_signature_tagvalues.html"> <tt>dkim_set_signature_tagvalues()</tt> </a> </td>
+  <td> Provide a function to receive signature-specific tags and values
+       for user-side analysis. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_user_context.html"> <tt>dkim_set_user_context()</tt> </a> </td>
+  <td> Set a specific user context pointer for a sign or verify operation
+       which will be passed to user callbacks. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_ssl_version.html"> <tt>dkim_ssl_version()</tt> </a> </td>
+  <td> Retrieve the OpenSSL version used when the library was compiled. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_close.html"> <tt>dkim_close()</tt> </a> </td>
+  <td> Terminate an instance of the <b>DKIM</b> service. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Signing</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sign.html"> <tt>dkim_sign()</tt> </a> </td>
+  <td> Allocate a new <b>DKIM</b> handle for signing a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_add_querymethod.html"> <tt>dkim_add_querymethod()</tt> </a> </td>
+  <td> Indicate to verifiers which signing method(s) and option(s) should be
+       used to retrieve the public key for verification. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_add_xtag.html"> <tt>dkim_add_xtag()</tt> </a> </td>
+  <td> Add an extension tag and corresponding value. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getpartial.html"> <tt>dkim_getpartial()</tt> </a> </td>
+  <td> Check partial signature request flag. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getsighdr.html"> <tt>dkim_getsighdr()</tt> </a> </td>
+  <td> Generate and return a signature header into a fixed-size buffer. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getsighdr_d.html"> <tt>dkim_getsighdr_d()</tt> </a> </td>
+  <td> Generate and return a signature header in a dynamically-allocated
+       buffer. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_privkey_load.html"> <tt>dkim_privkey_load()</tt> </a> </td>
+  <td> Attempt to parse and load a signing key. </t>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_margin.html"> <tt>dkim_set_margin()</tt> </a> </td>
+  <td> Set the wrapping margin to use for signature header generation. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_set_signer.html"> <tt>dkim_set_signer()</tt> </a> </td>
+  <td> Set the message signer. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_setpartial.html"> <tt>dkim_setpartial()</tt> </a> </td>
+  <td> Request "l=" tag on a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_signhdrs.html"> <tt>dkim_signhdrs()</tt> </a> </td>
+  <td> Select header fields to be signed for this message, overriding the
+       default. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Verifying</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_verify.html"> <tt>dkim_verify()</tt> </a> </td>
+  <td> Allocate a new <b>DKIM</b> handle for verifying a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_atps_check.html"> <tt>dkim_atps_check()</tt> </a> </td>
+  <td> Perform an Authorized Third-Party Signer check. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_diffheaders.html"> <tt>dkim_diffheaders()</tt> </a> </td>
+  <td> Compare original headers to received headers and look for approximate
+       matches to identify header munging in order to explain verification
+       failures. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_get_reputation.html"> <tt>dkim_get_reputation()</tt> </a> </td>
+  <td> Query a DKIM reputation service. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getdomain.html"> <tt>dkim_getdomain()</tt> </a> </td>
+  <td> Return the sending domain from a message represented by a DKIM
+       handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getresultstr.html"> <tt>dkim_getresultstr()</tt> </a> </td>
+  <td> Translate a DKIM_STAT constant into a string. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getsiglist.html"> <tt>dkim_getsiglist()</tt> </a> </td>
+  <td> Retrieve the array of signature handles associated with a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getsignature.html"> <tt>dkim_getsignature()</tt> </a> </td>
+  <td> Retrieve the signature handle to be used for final message
+       disposition. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getsslbuf.html"> <tt>dkim_getsslbuf()</tt> </a> </td>
+  <td> Retrieve the SSL error buffer for a DKIM signing handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getuser.html"> <tt>dkim_getuser()</tt> </a> </td>
+  <td> Return the sending user from a message represented by a DKIM
+       handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_minbody.html"> <tt>dkim_minbody()</tt> </a> </td>
+  <td> Return number of bytes required to satisfy all active canonicalizations
+       referenced by a DKIM handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_ohdrs.html"> <tt>dkim_ohdrs()</tt> </a> </td>
+  <td> Retrieve the original header set from a signature if such were
+       present. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getbh.html"> <tt>dkim_sig_getbh()</tt> </a> </td>
+  <td> Retrieve body hash test result from a signature handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getcanonlen.html"> <tt>dkim_sig_getcanonlen()</tt> </a> </td>
+  <td> Retrieve information regarding total canonicalized body length, and
+       the size of what was actually signed. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getcanons.html"> <tt>dkim_sig_getcanons()</tt> </a> </td>
+  <td> Retrieve the canonicalization modes used to generate a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getcontext.html"> <tt>dkim_sig_getcontext()</tt> </a> </td>
+  <td> Retrieve user-side context specific to a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getdnssec.html"> <tt>dkim_sig_getdnssec()</tt> </a> </td>
+  <td> Retrieve DNSSEC evaluation of a signature's key record. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getdomain.html"> <tt>dkim_sig_getdomain()</tt> </a> </td>
+  <td> Retrieve the domain name found in the signature on a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_geterror.html"> <tt>dkim_sig_geterror()</tt> </a> </td>
+  <td> Retrieve the error code associated with a rejected/disqualified
+       signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_geterrorstr.html"> <tt>dkim_sig_geterrorstr()</tt> </a> </td>
+  <td> Retrieve the text version of a signature error code. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getflags.html"> <tt>dkim_sig_getflags()</tt> </a> </td>
+  <td> Retrieve processing flags from a signature handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getidentity.html"> <tt>dkim_sig_getidentity()</tt> </a> </td>
+  <td> Retrieve the identity of the signing agent from a signature or
+       message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getkeysize.html"> <tt>dkim_sig_getkeysize()</tt> </a> </td>
+  <td> Retrieve the size in bits of the key used to verify a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getqueries.html">
+       <tt>dkim_sig_getqueries()</tt> </a> </td>
+  <td> Get the set of DNS queries needed to complete signature
+       validation. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getreportinfo.html"> <tt>dkim_sig_getreportinfo()</tt> </a> </td>
+  <td> Retrieve information required to generate a verification failure
+       report. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getselector.html"> <tt>dkim_sig_getselector()</tt> </a> </td>
+  <td> Retrieve the selector found in a signature on a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getsignalg.html"> <tt>dkim_sig_getsignalg()</tt> </a> </td>
+  <td> Retrieve the signature algorithm used to sign a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getsignedhdrs.html"> <tt>dkim_sig_getsignedhdrs()</tt> </a> </td>
+  <td> Retrieve signed header data. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getsigntime.html"> <tt>dkim_sig_getsigntime()</tt> </a> </td>
+  <td> Retrieve the timestamp on the signature of a message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_getsslbuf.html"> <tt>dkim_sig_getsslbuf()</tt> </a> </td>
+  <td> Retrieve the SSL error buffer for a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_hdrsigned.html"> <tt>dkim_sig_hdrsigned()</tt> </a> </td>
+  <td> Determine whether or not a particular header was signed. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_ignore.html"> <tt>dkim_sig_ignore()</tt> </a> </td>
+  <td> Flag a signature to be ignored when verifying. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_process.html"> <tt>dkim_sig_process()</tt> </a> </td>
+  <td> Process a signature for validity. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_setdnssec.html"> <tt>dkim_sig_setdnssec()</tt> </a> </td>
+  <td> Set the DNSSEC result code associated with a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_seterror.html"> <tt>dkim_sig_seterror()</tt> </a> </td>
+  <td> Set the error code associated with a signature. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Processing</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_header.html"> <tt>dkim_header()</tt> </a> </td>
+  <td> Process a header. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_eoh.html"> <tt>dkim_eoh()</tt> </a> </td>
+  <td> Identify end of headers. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_body.html"> <tt>dkim_body()</tt> </a> </td>
+  <td> Process a body chunk. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_eom.html"> <tt>dkim_eom()</tt> </a> </td>
+  <td> Identify end of message. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_chunk.html"> <tt>dkim_chunk()</tt> </a> </td>
+  <td> Process a message chunk. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Utility</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_getid.html"> <tt>dkim_getid()</tt> </a> </td>
+  <td> Retrieve "id" string from handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_get_msgdate.html"> <tt>dkim_get_msgdate()</tt> </a> </td>
+  <td> Attempt to parse the Date: header field of a message and return its
+       UNIX <tt>time_t</tt> conversion as a 64-bit unsigned integer. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_get_sigsubstring.html"> <tt>dkim_get_sigsubstring()</tt> </a> </td>
+  <td> Retrieve a minimal signature substring for matching results to
+       signatures. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_key_syntax.html"> <tt>dkim_key_syntax()</tt> </a> </td>
+  <td> Check the syntax of a key record. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_mail_parse.html"> <tt>dkim_mail_parse()</tt> </a> </td>
+  <td> Parse a message header field, e.g. <tt>From:</tt>, to get user and
+       domain. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_mail_parse_multi.html"> <tt>dkim_mail_parse_multi()</tt> </a> </td>
+  <td> Parse a message header field, e.g. <tt>To:</tt> or <tt>Cc:</tt>, to get
+       users and domains. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_options.html"> <tt>dkim_options()</tt> </a> </td>
+  <td> Get or set library options. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_qi_getname.html"> <tt>dkim_qi_getname()</tt> </a> </td>
+  <td> Retrieve the DNS name from a <tt>DKIM_QUERYINFO</tt> handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_qi_gettype.html"> <tt>dkim_qi_gettype()</tt> </a> </td>
+  <td> Retrieve the DNS resource record type from a <tt>DKIM_QUERYINFO</tt>
+       handle. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_gethashes.html"> <tt>dkim_sig_gethashes()</tt> </a> </td>
+  <td> Retrieve computed hashes related to a signature. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_gettagvalue.html"> <tt>dkim_sig_gettagvalue()</tt> </a> </td>
+  <td> Retrieve arbitrary tags and values from signatures and keys. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_sig_syntax.html"> <tt>dkim_sig_syntax()</tt> </a> </td>
+  <td> Check the syntax of a signature. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>DNS Operations</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_close.html"> <tt>dkim_dns_close()</tt> </a> </td>
+  <td> Force shutdown of the DNS resolver in use by the library. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_config.html"> <tt>dkim_dns_config()</tt> </a> </td>
+  <td> Provide the active DNS resolver with arbitrary configuration information
+       to be used. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_init.html"> <tt>dkim_dns_init()</tt> </a> </td>
+  <td> Force initialization of the DNS resolver to be used by the
+       library. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_nslist.html"> <tt>dkim_dns_nslist()</tt> </a> </td>
+  <td> Provide the active DNS resolver with a new set of nameservers to be
+       used. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_close.html"> <tt>dkim_dns_set_close()</tt> </a> </td>
+  <td> Set the function to be used by the library to terminate a DNS
+       resolver. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_config.html"> <tt>dkim_dns_set_config()</tt> </a> </td>
+  <td> Set the function to be used by the library to pass arbitrary
+       configuration data to the underlying resolver. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_init.html"> <tt>dkim_dns_set_init()</tt> </a> </td>
+  <td> Set the function to be used by the library to initialize a DNS
+       resolver. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_nslist.html"> <tt>dkim_dns_set_nslist()</tt> </a> </td>
+  <td> Set the function to be used by the library to change the set of
+       nameservers in use by a DNS resolver. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_query_cancel.html"> <tt>dkim_dns_set_query_cancel()</tt> </a> </td>
+  <td> Set the function to be used by the library to cancel a pending DNS
+       query whose result is no longer needed. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_query_service.html"> <tt>dkim_dns_set_query_service()</tt> </a> </td>
+  <td> Set the DNS query service handle to be used by the library. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_query_start.html"> <tt>dkim_dns_set_query_start()</tt> </a> </td>
+  <td> Set the DNS query start function to be used by the library. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_query_waitreply.html"> <tt>dkim_dns_set_query_waitreply()</tt> </a> </td>
+  <td> Set the function to be used by the library to wait for a
+       reply to a pending DNS query. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_set_trustanchor.html"> <tt>dkim_dns_set_trustanchor()</tt> </a> </td>
+  <td> Set the function to be used by the library to pass arbitrary
+       trust anchor data to the underlying resolver. </td>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_dns_trustanchor.html"> <tt>dkim_dns_trustanchor()</tt> </a> </td>
+  <td> Provide the active DNS resolver with trust anchor configuration
+       information to be used. </td>
+ </tr>
+
+ <tr>
+  <td colspan="2"> <b>Cleanup</b>
+ </tr>
+
+ <tr>
+  <td> <a href="dkim_free.html"> <tt>dkim_free()</tt> </a> </td>
+  <td> Destroy a per-message handle of the <b>DKIM</b> service. </td>
+ </tr>
+</table> <br>
+
+An overview of the general use of this API is available
+<a href="overview.html">here</a>.  An overview of the DNS resolver portion
+of the API is available <a href="dns.html">here</a>.
+
+<hr size="1">
+<font size="-1">
+Copyright (c) 2005-2008 Sendmail, Inc. and its suppliers.
+All rights reserved.
+<br>
+Copyright (c) 2009-2014, The Trusted Domain Project.  All rights reserved.
+
+<br>
+By using this file, you agree to the terms and conditions set
+forth in the respective licenses.
+</font>
+</body>
+</html>

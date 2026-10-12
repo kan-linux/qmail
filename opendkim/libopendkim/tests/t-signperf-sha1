@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+#
+# Speed signing test using sha1 hash algorithm
+
+./t-signperf -s rsa-sha1

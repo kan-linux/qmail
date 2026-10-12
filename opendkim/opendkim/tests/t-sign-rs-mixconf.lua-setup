@@ -1,0 +1,8 @@
+
+-- Copyright (c) 2009, 2010, 2012, The Trusted Domain Project.
+--   All rights reserved.
+
+-- sample "setup" hook script that issues a single signing request
+
+-- make the signing request
+odkim.sign(ctx, "testkey")

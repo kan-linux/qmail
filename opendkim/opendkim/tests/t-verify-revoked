@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# 
+# verify revoked key test
+
+if [ x"$srcdir" = x"" ]
+then
+	srcdir=`pwd`
+fi
+
+../../miltertest/miltertest $MILTERTESTFLAGS -s $srcdir/t-verify-revoked.lua -v -v -v

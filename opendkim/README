@@ -1,0 +1,281 @@
+OPENDKIM README
+===============
+
+This directory has the latest open source DKIM filter software from The
+OpenDKIM Project.
+
+There is a web site at http://www.opendkim.org that is home for the latest
+updates.
+
+
++--------------+
+| INTRODUCTION |
++--------------+
+
+The Trusted Domain Project is a community effort to develop and maintain an open
+source library for producing DKIM-aware applications, and a "milter"-based
+filter for providing DKIM service.
+
+The DKIM sender authentication system was originally created by the E-mail
+Signing Technology Group (ESTG) and is now a draft standard of the
+IETF (RFC6376).  DKIM is an amalgamation of the DomainKeys (DK) proposal by
+Yahoo!, Inc. and the Internet Identified Mail (IIM) proposal by Cisco.
+
+"milter" is a portmanteau of "mail filter" and refers to a protocol and API
+for communicating mail traffic information between MTAs and mail filtering
+plug-in applications.  It was originally invented at Sendmail, Inc. but
+has also been adapted to other MTAs.
+
+The OpenDKIM project started as a code fork of version 2.8.3 of the open source
+"dkim-milter" package developed and maintained by Sendmail, Inc.  The license
+used by The OpenDKIM project is found in the LICENSE file.  Portions of this
+project are also covered by the Sendmail Open Source License, available in
+this distribution in the file "LICENSE.Sendmail".  See the copyright notice(s)
+in each source file to determine whether or not it is covered by both licenses.
+
+This package consists of a library that implements the DKIM service and a
+milter-based filter application that can plug in to any milter-aware MTA to
+provide that service to sufficiently recent sendmail, Postfix or other MTAs
+that support the milter protocol.
+
+An optional asynchronous resolver library is also provided to work around
+limitations of the basic BIND resolver which comes installed on most
+systems.
+
+
++--------------+
+| DEPENDENCIES |
++--------------+
+
+To compile and operate, this package requires the following:
+
+o OpenSSL (http://www.openssl.org, or ask your software vendor for a package).
+  Any version will get you started, however v0.9.8 or later is required if
+  you want to be able to sign or verify messages using the SHA256 message
+  digest algorithm which is generally required for current DKIM applications.
+
+o sendmail v8.13.0 (or later), or Postfix 2.3, (or later) and libmilter.
+  (These are only required if you are building the filter.)
+
+o Access to a working nameserver (required only for signature verification).
+
+o On Linux systems, either libbsd (BSD compatibility library) or some other
+  library that provides strlcat() and strlcpy().
+
+o If you wish to interface the filter with SQL databases, or store statistical
+  information in a database, OpenDBX v1.3.7 or later is required.
+
+o If you wish to use the Lua interpreter hooks for filter policy control, or
+  statistical extensions (--enable-statsext), Lua v5.1 or later is required.
+
+o If you wish to interface the filter with LDAP servers, OpenLDAP v2.1.3
+  or later is required.
+
+o For local hash or btree database support in either the filter or the
+  library, Oracle's BerkeleyDB is required.  All versions are supported.
+
+o If you are interested in tinkering with the build and packaging structure,
+  you may need to upgrade to these versions of GNU's "autotools" components:
+	autoconf (GNU Autoconf) 2.61
+	automake (GNU automake) 1.7 (or 1.9 to avoid warnings)
+	ltmain.sh (GNU libtool) 2.2.6 (or 1.5.26 after make maintainer-clean)
+
+
++-----------------------+
+| RELATED DOCUMENTATION |
++-----------------------+
+
+The man page for opendkim (the actual filter program) is present in the
+opendkim directory of this source distribution.  There is additional
+information in the INSTALL and FEATURES files, and in the README file in the
+opendkim directory.  Changes are documented in the RELEASE_NOTES file.
+
+HTML-style documentation for libopendkim is available in libopendkim/docs in
+this source distribution.
+
+General information about DKIM can be found at http://www.dkim.org
+
+Mailing lists discussing and supporting the DKIM software found in this
+package are maintained via a list server at opendkim.org.  Visit
+http://www.opendkim.org to subscribe or browse archives.  The available
+lists are:
+
+	opendkim-announce	(moderated) Release announcements.
+
+	opendkim-users		General OpenDKIM user questions and answers.
+
+	opendkim-dev		Chatter among OpenDKIM developers.
+
+	opendkim-cvs		Automated source code change announcements.
+				May be renamed soon to something more general
+				since we're moving away from CVS.
+
+Bug tracking is done via the trackers on SourceForge at
+http://sourceforge.net/projects/opendkim.  You can enter new bug
+reports there, but please check first for older bugs already open,
+or even already closed, before opening a new issue.
+
+
++---------+
+| WARNING |
++---------+
+
+Since OpenDKIM uses cryptography, the following information from OpenSSL
+applies to this package as well.
+
+PLEASE REMEMBER THAT EXPORT/IMPORT AND/OR USE OF STRONG CRYPTOGRAPHY
+SOFTWARE, PROVIDING CRYPTOGRAPHY HOOKS OR EVEN JUST COMMUNICATING
+TECHNICAL DETAILS ABOUT CRYPTOGRAPHY SOFTWARE IS ILLEGAL IN SOME
+PARTS OF THE WORLD.  SO, WHEN YOU IMPORT THIS PACKAGE TO YOUR
+COUNTRY, RE-DISTRIBUTE IT FROM THERE OR EVEN JUST EMAIL TECHNICAL
+SUGGESTIONS OR EVEN SOURCE PATCHES TO THE AUTHOR OR OTHER PEOPLE
+YOU ARE STRONGLY ADVISED TO PAY CLOSE ATTENTION TO ANY EXPORT/IMPORT
+AND/OR USE LAWS WHICH APPLY TO YOU.  THE AUTHORS ARE NOT LIABLE FOR
+ANY VIOLATIONS YOU MAKE HERE.  SO BE CAREFUL, IT IS YOUR RESPONSIBILITY.
+
+If you use OpenSSL then make sure you read their README file which
+contains information about patents etc.
+
+
++---------------------+
+| DIRECTORY STRUCTURE |
++---------------------+
+
+contrib		A collection of user contributed scripts that may be useful.
+
+docs		A collection of RFCs and drafts related to opendkim.
+
+libar		An optional thread-safe asynchronous resolver library.
+
+libopendkim	A library that implements the proposed DKIM standard.
+
+libopendkim/docs HTML documentation describing the API provided by libopendkim.
+
+libvbr		An optional library that implements Vouch By Reference
+		(VBR, RFC5518).
+
+opendkim	A milter-based filter application which uses libopenkim (and
+		optionally libar) to provide DKIM service via an MTA using
+		the milter protocol.
+
+
++----------------+
+| RUNTIME ISSUES |
++----------------+
+
+WARNING: symbol 'X' not available
+
+ The filter attempted to get some information from the MTA that the MTA
+ did not provide.
+
+ At various points in the interaction between the MTA and the filter, certain
+ macros containing information about the job in progress or the connection
+ being handled are passed from the MTA to the filter.
+
+ In the case of sendmail, the names of the macros the MTA should pass to the
+ filter are defined by the "Milter.macros" settings in sendmail.cf, e.g.
+ "Milter.macros.connect", "Milter.macros.envfrom", etc.  This message
+ indicates that the filter needed the contents of macro X, but that macro
+ was not passed down from the MTA.
+
+ Typically the values needed by this filter are passed from the MTA if the
+ sendmail.cf was generated by the usual m4 method.  If you do not have
+ those options defined in your sendmail.cf, make sure your M4 configuration
+ files are current and rebuild your sendmail.cf to get appropriate lines
+ added to your sendmail.cf, and then restart sendmail.
+
+MTA timeouts
+
+ By default, the MTA is configured to wait up to ten seconds for a response
+ from a filter before giving up.  When querying remote nameservers
+ for key and policy data, the DKIM filter may not get a response from the
+ resolver within that time frame, and thus this MTA timeout will occur.
+ This can cause messages to be rejected, temp-failed or delivered without
+ verification, depending on the failure mode selected for the filter.
+
+ When using the standard resolver library provided with your system, the
+ DNS timeout cannot be adjusted.  If you encounter this problem, you must
+ increase the time the MTA waits for replies.  See the documentation in
+ the sendmail open source distribution (libmilter/README in particular)
+ for instructions on changing these timeouts.
+
+ When using the provided asynchronous resolver library, you can use the
+ "-T" command line option to change the timeout so that it is shorter than
+ the MTA timeout.
+
+d2i_PUBKEY_bio() failed
+
+ After retrieving and decoding a public key to perform a message verification,
+ the OpenSSL library attempted to make use of that key but failed.  The
+ known possible causes are:
+
+  (a) Memory exhaustion
+
+  (b) Key corruption
+
+ If you're set to temp-fail messages in these cases, the remote end will
+ probably retry the message.  If the same message fails again later,
+ the key is probably corrupted or otherwise invalid.
+
+ You can try compiling with _FFR_LOG_SSL_ERRORS to have the filter extract
+ OpenSSL library errors and include them in the system log when such
+ conditions occur for further diagnostics.  In one observed case, a corrupt
+ key also caused the following to be logged:
+
+  error:0D0680A8:asn1 encoding routines:ASN1_CHECK_TLEN:wrong tag;
+  error:0D07803A:asn1 encoding routines:ASN1_ITEM_EX_D2I:nested asn1 error
+
+Other OpenDKIM issues:
+
+ Report any bugs to the email address opendkim-users@lists.opendkim.org or to
+ the sourceforge issue trackers accessible at:
+ 
+ https://sourceforge.net/p/opendkim/_list/tickets
+
+
++-----------------------------+
+| Sendmail REWRITING FEATURES |
++-----------------------------+
+
+There are two features of the sendmail MTA which, if activated, can interfere
+with successful use of the DKIM service.  The two features are MASQUERADE_AS
+and FEATURE(genericstable).  See cf/README in the open source sendmail
+source code distribution for more information.
+
+Due to the way the milter protocol is incorporated into the MTA, opendkim
+sees the headers before they are modified as required by those two features.
+This means the DKIM signature is generated based on the headers originally
+injected by the mail client and not on the headers which are actually sent
+out by the MTA.  As a result, the verifying agent at the receiver's side
+will be unable to verify the signature as the signed data and the received
+data don't match.
+
+The suggested solutions to this problem are:
+
+(1) Send mail with the headers already written as needed, obviating the
+    need for these features (or just turn them off).
+
+(2) Have two MTAs set up, either on separate boxes or on the same box.
+    The first MTA should do all of the rewriting (i.e. use these two
+    features) and the second one should use opendkim to add the signature
+    and do no rewriting at all.
+
+(3) Have multiple DaemonPortOptions lines in your configuration file.  The
+    first daemon port (port 25) does the header rewriting and then routes
+    the message to the second port; the latter does no rewriting but does the
+    signing and then sends the message on its way.
+
+There is also a feature of Sendmail that will cause it to alter addresses
+after signing but before they are transmitted.  The feature, which is on
+by default, passes addresses in header fields to the resolver functions
+to ensure they are canonical.  This can result in the replacement of those
+strings in the sent message with their canonical forms only after the message
+is signed, which will invalidate the signatures.  To suppress this feature,
+add the following line to your sendmail.mc and submit.mc configuration files,
+re-generate your configuration and restart the filter:
+
+	FEATURE(`nocanonify')
+
+--
+Copyright (c) 2010-2012, 2014, The Trusted Domain Project.
+  All rights reserved.

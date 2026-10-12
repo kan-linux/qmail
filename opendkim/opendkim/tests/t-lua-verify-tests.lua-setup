@@ -1,0 +1,7 @@
+
+-- Copyright (c) 2010-2012, The Trusted Domain Project.  All rights reserved.
+
+-- sample "setup" hook script that does various Lua things
+
+-- change the From: header field before signing
+odkim.replace_header(ctx, "From", 0, "user@example.com")

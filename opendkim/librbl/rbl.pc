@@ -1,0 +1,15 @@
+# Process this file with autoconf to produce a pkg-config metadata file.
+
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: RBL (Real-time Blacklist) library
+Description: Library for assisting in RBL query functions
+URL: http://www.opendkim.org
+Version: 2.10.3
+Libs: -L${libdir} -lrbl
+Libs.private: 
+Cflags: -I${includedir}
+

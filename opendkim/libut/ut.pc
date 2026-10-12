@@ -1,0 +1,14 @@
+# Process this file with autoconf to produce a pkg-config metadata file.
+
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: UT (URL Template Library)
+Description: Library for assisting in URI construction from templates
+URL: http://www.opendkim.org
+Version: 2.10.3
+Libs: -L${libdir} -lut
+Cflags: -I${includedir}
+

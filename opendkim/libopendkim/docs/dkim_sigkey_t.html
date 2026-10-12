@@ -1,0 +1,48 @@
+<html>
+<head><title>dkim_sigkey_t</title></head>
+<body>
+<!--
+-->
+<h1>dkim_sigkey_t</h1>
+<p align="right"><a href="index.html">[back to index]</a></p>
+
+<table border="0" cellspacing=4 cellpadding=4>
+<!----------- Description ---------->
+<tr><th valign="top" align=left>DESCRIPTION</th><td>
+<table border="1" cellspacing=1 cellpadding=4>
+<tr align="left" valign=top>
+<th width="80">Purpose</th>
+<td>A <tt>dkim_sigkey_t</tt> points to the private key to be
+    used to sign messages.  It should be a contiguous block of memory
+    containing the private key either in PEM format, or in base64-encoded
+    DER format, terminated by a NUL character.  (For now, it is simply a
+    pointer to a string of type <tt>unsigned char</tt>.) </td>
+</tr>
+</table>
+
+<!----------- Notes ---------->
+<tr>
+<th valign="top" align=left>NOTES</th> 
+<td>
+<ul>
+<li>The calling application should read the key into memory and
+    pass it in as this data type.  Carriage return and newline characters
+    (ASCII 13 and 10, respectively) need not be stripped.
+</ul>
+</td>
+</tr>
+</table>
+
+<hr size="1">
+<font size="-1">
+Copyright (c) 2005 Sendmail, Inc. and its suppliers.
+All rights reserved.
+<br>
+Copyright (c) 2009, 2010, The Trusted Domain Project.  All rights reserved.
+
+<br>
+By using this file, you agree to the terms and conditions set
+forth in the respective licenses.
+</font>
+</body>
+</html>

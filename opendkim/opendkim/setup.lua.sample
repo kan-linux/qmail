@@ -1,0 +1,79 @@
+--
+--  Copyright (c) 2009, 2010, 2012, The Trusted Domain Project.
+--    All rights reserved.
+--
+--  setup.lua.sample -- sample version of the "setup" script that demonstrates
+--                      all of the features of the configuration file
+--
+--  The setup script is executed after all header fields have been received
+--  but before any DKIM operations have begun.  Thus, this script can decide
+--  what signatures, if any, should be added.
+
+--  We never sign mail to example.net
+nrcpts = odkim.rcpt_count(ctx)
+for n = 1, nrcpts do
+	rcpt = odkim.get_rcpt(ctx, n - 1)
+	if string.find(rcpt, "@example.net", 1, true) ~= nil then
+		odkim.verify(ctx)
+		return nil
+	end
+end
+
+--  We blindly accept mail that looks like it's from example.org
+from = odkim.get_fromdomain(ctx)
+if from == "example.org" then
+	odkim.set_result(ctx, SMFIS_ACCEPT)
+	return nil
+end
+
+--  If POP-before-SMTP failed, just verify it
+popauth = odkim.check_popauth(ctx)
+if popauth == 0 then
+	odkim.verify(ctx)
+	return nil
+end
+
+--  See if {auth_author} was set
+author = odkim.get_mtasymbol(ctx, "{auth_author}")
+
+--  If it's not from an internal source or authenticated, just verify it
+if odkim.internal_ip(ctx) == 0 and author == nil then
+	odkim.verify(ctx)
+	return nil
+end
+
+--  If MTA name tests were requested, do the test and just verify if no match
+mtadb = odkim.get_dbhandle(ctx, DB_MTAS)
+if mtadb ~= nil then
+	mtaname = odkim.get_mtasymbol(ctx, "{daemon_name}")
+	if mtaname ~= nil then
+		if odkim.db_check(mtadb, mtaname) == 0 then
+			odkim.verify(ctx)
+			return nil
+		end
+	end
+end
+
+--  Compare "From" domain to domains DB, just verify if no match
+domains = odkim.get_dbhandle(ctx, DB_DOMAINS)
+if domains == nil or odkim.db_check(domains, from) == 0 then
+	odkim.verify(ctx)
+	return nil
+end
+
+--  Since we got this far, we're signing; make a signing request using the
+--  key "defkey"
+odkim.sign(ctx, "defkey")
+
+--  If it looks like it might be going to a list (in that the recipient ends
+--  in "-l"), add an "l=" tag.  (We need to add a hook for the body length
+--  DB, perhaps.)
+for n = 1, nrcpts do
+	rcpt = odkim.get_rcpt(ctx, n - 1)
+	if string.find(rcpt, "-l@", 1, true) ~= nil then
+		odkim.use_ltag(ctx)
+	end
+end
+
+--  That's it!
+return nil

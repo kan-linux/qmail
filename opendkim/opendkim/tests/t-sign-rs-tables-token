@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# 
+# relaxed/simple signing test using KeyTable with the domain token
+
+if [ x"$srcdir" = x"" ]
+then
+	srcdir=`pwd`
+fi
+
+../../miltertest/miltertest $MILTERTESTFLAGS -s $srcdir/t-sign-rs-tables-token.lua

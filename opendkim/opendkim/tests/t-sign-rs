@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# 
+# relaxed/simple signing test
+
+if [ x"$srcdir" = x"" ]
+then
+	srcdir=`pwd`
+fi
+
+../../miltertest/miltertest $MILTERTESTFLAGS -s $srcdir/t-sign-rs.lua

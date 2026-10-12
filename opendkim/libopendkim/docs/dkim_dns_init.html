@@ -1,0 +1,82 @@
+<html>
+<head><title>dkim_dns_init()</title></head>
+<body>
+<!--
+-->
+<h1>dkim_dns_init()</h1>
+<p align="right"><a href="index.html">[back to index]</a></p>
+
+<table border="0" cellspacing=4 cellpadding=4>
+<!---------- Synopsis ----------->
+<tr><th valign="top" align=left width=150>SYNOPSIS</th><td>
+<pre>
+#include &lt;dkim.h&gt;
+<tt>int</tt> dkim_dns_init(
+	<a href="dkim_lib.html"><tt>DKIM_LIB</tt></a> *libopendkim)
+);
+
+</pre>
+Initializes the DNS resolver to be used by the library.  This in turn calls
+either the compiled-in default or the replacement provided by a call to
+<a href="dkim_dns_set_init.html"><tt>dkim_dns_set_init()</tt></a>.
+This is automatically called if the resolver has not yet been initialized and
+the library needs to perform a DNS lookup.
+</td></tr>
+
+<!----------- Description ---------->
+<tr><th valign="top" align=left>DESCRIPTION</th><td>
+<table border="1" cellspacing=1 cellpadding=4>
+<tr align="left" valign=top>
+<th width="80">Called When</th>
+<td><tt>dkim_dns_init()</tt> can be called at any time.  It always returns
+<tt>DKIM_DNS_SUCCESS</tt> if the resolver was already initialized.  </td>
+</tr>
+</table>
+
+<!----------- Arguments ---------->
+<tr><th valign="top" align=left>ARGUMENTS</th><td>
+    <table border="1" cellspacing=0>
+    <tr bgcolor="#dddddd"><th>Argument</th><th>Description</th></tr>
+    <tr valign="top"><td>libopendkim</td>
+	<td>The library instantiation handle, returned by
+        <a href="dkim_init.html"><tt>dkim_init()</tt></a>.
+	</td></tr>
+    </table>
+</td></tr>
+
+<!----------- Return Values ---------->
+<tr>
+<th valign="top" align=left>RETURN VALUES</th> 
+<td>
+<ul>
+<li><tt>DKIM_DNS_SUCCESS</tt> -- successful operation
+<li><tt>DKIM_DNS_INVALID</tt> -- already initialized
+<li><tt>DKIM_DNS_ERROR</tt> -- an error occurred
+</ul>
+</td>
+</tr>
+
+<!----------- Notes ---------->
+<tr>
+<th valign="top" align=left>NOTES</th> 
+<td>
+<ul>
+<li>None.
+</ul>
+</td>
+</tr>
+</table>
+
+<hr size="1">
+<font size="-1">
+Copyright (c) 2007 Sendmail, Inc. and its suppliers.
+All rights reserved.
+<br>
+Copyright (c) 2012, The Trusted Domain Project.  All rights reserved.
+
+<br>
+By using this file, you agree to the terms and conditions set
+forth in the respective licenses.
+</font>
+</body>
+</html>

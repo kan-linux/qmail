@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# 
+# unsigned message test
+
+if [ x"$srcdir" = x"" ]
+then
+	srcdir=`pwd`
+fi
+
+../../miltertest/miltertest $MILTERTESTFLAGS -s $srcdir/t-verify-unsigned.lua

@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+#
+# Speed signing test using relaxed/relaxed canonicalization
+
+./t-signperf -b relaxed -h relaxed

@@ -1,0 +1,82 @@
+<html>
+<head><title>dkim_header()</title></head>
+<body>
+<!--
+-->
+<h1>dkim_header()</h1>
+<p align="right"><a href="index.html">[back to index]</a></p>
+
+<table border="0" cellspacing=4 cellpadding=4>
+<!---------- Synopsis ----------->
+<tr><th valign="top" align=left width=150>SYNOPSIS</th><td>
+<pre>
+#include &lt;dkim.h&gt;
+<a href="dkim_stat.html"><tt>DKIM_STAT</tt></a> dkim_header(
+	<a href="dkim.html"><tt>DKIM</tt></a> *dkim,
+	char *header,
+	size_t len)
+);
+</pre>
+Handle a message header field.
+</td></tr>
+
+<!----------- Description ---------->
+<tr><th valign="top" align=left>DESCRIPTION</th><td>
+<table border="1" cellspacing=1 cellpadding=4>
+<tr align="left" valign=top>
+<th width="80">Called When</th>
+<td><tt>dkim_header()</tt> is called zero or more times between
+<a href="dkim_sign.html"><tt>dkim_sign()</tt></a> or
+<a href="dkim_verify.html"><tt>dkim_verify()</tt></a> and
+<a href="dkim_eoh.html"><tt>dkim_eoh()</tt></a>, once per message header
+field.</td>
+</tr>
+</table>
+
+<!----------- Arguments ---------->
+<tr><th valign="top" align=left>ARGUMENTS</th><td>
+    <table border="1" cellspacing=0>
+    <tr bgcolor="#dddddd"><th>Argument</th><th>Description</th></tr>
+    <tr valign="top"><td>dkim</td>
+	<td>Per-message DKIM handle.
+	</td></tr>
+    <tr valign="top"><td>header</td>
+	<td>The header field being input, including its name, value and
+	    separating colon (":") character.
+	</td></tr>
+    <tr valign="top"><td>len</td>
+	<td>Number of bytes to read from <tt>header</tt>.
+	</td></tr>
+    </table>
+</td></tr>
+
+<!----------- Notes ---------->
+<tr>
+<th valign="top" align=left>NOTES</th> 
+<td>
+<ul>
+<li>The value of <tt>header</tt> should not contain a trailing CRLF as this
+    will be added by the canonicalization code.  However, a CRLF may appear
+    elsewhere in the value if, for example, the header field is meant to be
+    wrapped.
+<li>A header field whose name includes a semi-colon cannot be used as it
+    will produce a syntactically invalid signature.  Such header fields cause
+    this function to return <tt>DKIM_STAT_SYNTAX</tt>.
+</ul>
+</td>
+</tr>
+</table>
+
+<hr size="1">
+<font size="-1">
+Copyright (c) 2005-2007 Sendmail, Inc. and its suppliers.
+All rights reserved.
+<br>
+Copyright (c) 2009-2011, The Trusted Domain Project.  All rights reserved.
+
+<br>
+By using this file, you agree to the terms and conditions set
+forth in the respective licenses.
+</font>
+</body>
+</html>

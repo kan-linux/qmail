@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+#
+# Speed signing test using simple/simple canonicalization
+
+./t-signperf -b simple -h simple

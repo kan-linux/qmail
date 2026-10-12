@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Copyright (c) 2010, 2012, The Trusted Domain Project.  All rights reserved.
+#
+# Dummy "MTA" that just writes stdin to a file for testing.
+
+while [ "$1" != "" ];
+do
+	echo $1 >> $TMPFILE
+	shift
+done
+
+cat >> $TMPFILE

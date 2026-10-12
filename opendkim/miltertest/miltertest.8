@@ -1,0 +1,548 @@
+.TH miltertest 8 "The Trusted Domain Project"
+.SH NAME
+.B miltertest
+\- milter unit test utility
+.SH SYNOPSIS
+.B miltertest
+[\-D name[=value]] [\-s script] [\-u] [\-v] [\-V] [\-w]
+.SH DESCRIPTION
+.B miltertest
+simulates the MTA side of an MTA-milter interaction for testing a milter-aware
+filter application.  It takes as input a script using the Lua language,
+and by exporting some utility functions, makes it possible for users to
+write scripts that exercise a filter.
+
+See documentation on Lua (e.g. http://www.lua.org) for the syntax
+of the language in general.  The documentation below describes functions
+that are added to Lua by this application to make testing possible.
+
+Documentation on milter can be found at http://www.milter.org.  A particular
+transaction must follow a series of steps to be completed, namely
+negotiate, connection information, envelope sender, envelope recipient(s),
+header field(s), end-of-header, body chunk(s), end-of-message.  To make the
+work of writing tests with
+.B miltertest
+simpler, any of these steps prior to end-of-message that is skipped will be
+filled in using arbitrary, but legal, data.
+
+Interspersed with these protocol phases are optional macro (key/value)
+deliveries from the MTA.
+.B miltertest
+will never send these automatically.  If they are needed for your tests,
+you must send them as part of your test script.
+.SH OPTIONS
+.TP
+.I -D name[=value]
+Defines a global variable called
+.I name
+to the Lua interpreter.  If a
+.I value
+is provided, the global variable is set to that value (as a string,
+although Lua can convert strings to numbers internally).  If no
+.I value
+is provided, the global variable is set to 1.
+.TP
+.I -s script
+Use the contents of file
+.I script
+as the Lua script to be executed.  The default is to read from standard
+input.
+.TP
+.I -u
+After the filter being tested is terminated, report user and system time
+consumed.  See
+.I getrusage(2).
+.TP
+.I -v
+Increase verbose output.  May be specified multiple times to request
+more and more information.
+.TP
+.I -V
+Print version number and exit.
+.TP
+.I -w
+Don't wait for child status to be returned when testing is complete.
+.SH FUNCTIONS
+The following functions are made available to Lua scripts for exercising
+a filter.  All functions return Lua constant "nil" on success or an error
+string on failure, unless otherwise indicated.
+.TP
+.B mt.abort(conn)
+Aborts the transaction in progress on the specified connection.
+.TP
+.B mt.bodyfile(conn, file)
+Sends the contents of the named
+.I file
+to the connection as body data.  If there is any error opening
+.I file
+for reading, the test aborts.
+.TP
+.B mt.bodyrandom(conn, n)
+Sends at least
+.I n
+bytes of random-length lines of random printable ASCII data as body
+chunks to the specified connection.
+.TP
+.B mt.bodystring(conn, str)
+Sends
+.I str
+as a chunk of body text on the specified connection.
+.TP
+.B mt.chdir(directory)
+Changes the current working directory to the named
+.I directory.
+.TP
+.B mt.connect(sockinfo[, count, interval])
+Makes a connection to a filter listening at the socket described by
+.I sockinfo.
+Returns a handle referring to that connection, or the Lua constant
+"nil" on error.  If
+.I count
+and
+.I interval
+are included, they specify the number of times to try to connect to the filter
+and the delay between each connection in seconds (with floating point values
+permitted).  If the environment variable MILTERTEST_RETRY_SPEED_FACTOR is
+set and appears to contain an integer, the value of
+.I interval
+(if set) will be multiplied by the value found in that environment variable.
+This is included to allow tests in a large test suite to be easily adjusted
+on slow systems without reconfiguring the entire test suite.
+.TP
+.B mt.conninfo(conn, host, ip)
+Sends information about a new SMTP connection to the MTA, represented by
+connection
+.I conn,
+from the host named
+.I host
+at IP address
+.I ip
+(both strings).  If
+.I host
+is the Lua constant "nil", the string "localhost" is assumed.  If
+.I ip
+is the Lua constant "nil", a DNS query will be made for the IP address
+matching
+.I host;
+if none is found, the test will abort.  The
+.I ip
+may also be the special string "unspec", which will tell the filter that
+a connection came in from an unknown protocol family.
+.TP
+.B mt.data(conn)
+Announces the DATA command on the specified connection, which occurs between
+the last RCPT TO command and the beginning of the header block.
+.TP
+.B mt.disconnect(conn[, polite]))
+Sends a "quit" message to the specified connection and then closes that
+connection.  The specified
+.I conn
+handle should no longer be used.  If
+.I polite
+is defined, it must be a Boolean indicating whether a normal disconnect
+should be done (true) or an abrupt disconnect should be done (false).  An
+abrupt disconnect skips standard protocol shutdown steps.
+.TP
+.B mt.echo(string)
+Prints the specified
+.I string
+on standard output.  Returns nothing.
+.TP
+.B mt.eoh(conn)
+Announces end-of-header on the specified connection.
+.TP
+.B mt.eom(conn)
+Announces end-of-message on the specified connection, and begins capturing
+any other operations the filter might perform in that phase.
+.TP
+.B mt.eom_check(conn, op, param[, ...])
+Checks the captured set of EOM operations (see above) to determine whether
+or not specific milter actions were requested by the filter.  Returns
+a Boolean value (true or false).  See the EOM CHECKS section for details.
+.TP
+.B mt.getheader(conn, hdr, n)
+Retrieves the value of the
+.I nth
+instance of header field named
+.I hdr
+added during end-of-message processing on the specified connection.
+This can be used by the script to verify that the header thus added contains
+the right thing.  Returns the value as a string, or the Lua constant
+"nil" on error.
+.TP
+.B mt.getcwd()
+Returns the current working directory as a string.
+.TP
+.B mt.getreply(conn)
+Returns the last milter reply received from the specified connection,
+as an integer.  This can be compared to any of the SMFIR_* constants defined
+by milter to see if the filter responded as expected.  This value is initially
+set to the NULL character.
+.TP
+.B mt.header(conn, name, value)
+Sends the header with the given
+.I name
+and
+.I value
+to the specified connection.
+.TP
+.B mt.helo(conn, name)
+Sends HELO/EHLO information using the specified
+.I name
+as the parameter given.
+.TP
+.B mt.macro(conn, type, name, value[, name2, value2[, ...]])
+Declares a macro called
+.I name
+whose value is
+.I value
+and whose type (matching protocol element) is
+.I type.
+Valid types are SMFIC_CONNECT, SMFIC_HELO, SMFIC_MAIL and SMFIC_RCPT.  Multiple
+macro names and values can be provided, but they must appear in pairs.
+.TP
+.B mt.mailfrom(conn, envfrom[, ...])
+Announces
+.I envfrom
+as the envelope sender of a new message.  ESMTP parameters as additional
+arguments are permitted.
+.TP
+.B mt.negotiate(conn, version, actions, steps)
+Performs milter option negotiation with the connection
+.I conn,
+advertising that the specified protocol
+.I version,
+protocol
+.I actions
+and protocol
+.I steps
+are offered by the MTA.  Returns the Lua constant "nil" on success
+or an error string on failure.  If any of the protocol parameters are
+"nil", the current defaults (defined in
+.I libmilter/mfdef.h,
+provided with the milter source code) will be used.
+.TP
+.B mt.rcptto(conn, envrcpt[, ...])
+Announces
+.I envrcpt
+as an envelope recipient of a message.  ESMTP parameters as additional
+arguments are permitted.
+.TP
+.B mt.set_timeout(n)
+Sets the read timeout to
+.I n
+seconds.  The default is ten seconds.  Returns nothing.
+.TP
+.B mt.sleep(n)
+Sleeps for
+.I n
+seconds.  The value may be an integer (for whole seconds) or a
+floating-point value (for partial seconds).
+.TP
+.B mt.signal(n)
+Sends the specified signal number
+.I n
+to the running filter.
+.TP
+.B mt.startfilter(path, arg1, arg2, ...)
+Starts the filter whose binary is located at
+.I path
+with argument vector comprised of strings
+.I path,
+.I arg1,
+.I arg2,
+etc.  Basically this is almost the same syntax as
+.I execl(3)
+except that
+.B miltertest
+also does the fork for you, and will remember the process ID in order to
+request a clean shutdown using SIGTERM and
+.I wait(2)
+at the end of the test script.  If the filter could not be started, an
+exception is generated with an error message returned.
+.TP
+.B mt.test_action(conn, action)
+Tests whether or not the connection represented by
+.I conn
+requested the specified milter protocol
+.I action,
+specified by an SMFIF_* constant, during option negotiation.  (See the
+libmilter documentation and/or include files for details.)
+.TP
+.B mt.test_option(conn, option)
+Tests whether or not the connection represented by
+.I conn
+requested the specified milter protocol
+.I option,
+specified by an SMFIP_* constant, during option negotiation.  (See the
+libmilter documentation and/or include files for details.)
+.TP
+.B mt.unknown(conn, str)
+Announces that the unknown SMTP command
+.I str
+arrived over the connection represented by
+.I conn.
+.SH EOM CHECKS
+The
+.B mt.eom_check()
+function is used to determine what changes to the message the filter
+requested during its EOM callback.  The changes can be requested
+in any order.  The first parameter,
+.I op,
+indicates what operation is of interest, and it also dictates what the
+possible parameter list is.  Valid values and corresponding parameters for
+.I op
+are as follows:
+.TP
+.I MT_HDRADD
+Checks to see if a header field was added to the message.  If no parameters
+are given, the function returns true if any header field was added.  If
+one parameter was given, the function returns true only if the named
+header field was added (regardless of its value).  If two parameters are
+given, the function returns true only if the named header field was added
+with the specified value.
+.TP
+.I MT_HDRCHANGE
+Checks to see if an existing header field was changed.  If no parameters
+are given, the function returns true if any header field was modified.  If
+one parameter was given, the function returns true only if the named
+header field was modified (regardless of its new value).  If two parameters
+are given, the function returns true only if the named header field was
+modified to have the specified new value.
+.TP
+.I MT_HDRDELETE
+Checks to see if an existing header field was deleted.  If no parameters
+are given, the function returns true if any header field was deleted.  If
+one parameter was given, the function returns true only if the named
+header field was deleted.
+.TP
+.I MT_HDRINSERT
+Checks to see if a header field was inserted into the message.  If no
+parameters are given, the function returns true if any header field was
+added.  If one parameter was given, the function returns true only if the
+named header field was added (regardless of its value).  If two parameters are
+given, the function returns true only if the named header field was added
+with the specified value.  If three parameters are given, the function
+returns true only if the named header field was added with the specified
+value at the specified index.
+.TP
+.I MT_RCPTADD
+Checks to see if an envelope recipient was added.  Currently only one
+parameter may be provided.
+.TP
+.I MT_RCPTDELETE
+Checks to see if an envelope recipient was deleted.  Currently only one
+parameter may be provided.
+.TP
+.I MT_BODYCHANGE
+Checks to see if the message's body was replaced by other content.  With
+no parameters, the function returns true only if the body was changed
+(regardless of the new content).  With one parameter, the function returns
+true only if the body was changed to the specified new content.
+.TP
+.I MT_QUARANTINE
+Checks to see if the filter requested quarantining of the message.
+With no parameters, the function returns true only if quarantine was
+requested.  With one parameter, the function returns true only if quarantine
+was requested with the specified reason string.
+.TP
+.I MT_SMTPREPLY
+Checks to see if the filter requested a specific SMTP reply message.
+With no parameters, the function returns true only if a specific reply
+was requested.  With one parameter, the function returns true only if
+a specific reply was requested with the specified SMTP code.  With two
+parameters, the function returns true only if a specific reply was
+requested with the specified SMTP code and enhanced status code.  With three
+parameters, the function returns true only if a specific reply was
+requested with the specified SMTP code, enhanced status code, and text.
+.SH EXAMPLE
+.PD 0
+-- Echo that the test is starting
+.PP
+mt.echo("*** begin test")
+.PP
+-- start the filter
+.PP
+mt.startfilter("../myfilter", "\-p", "inet:12345@localhost")
+.PP
+mt.sleep(2)
+
+.PP
+-- try to connect to it
+.PP
+conn = mt.connect("inet:12345@localhost")
+.PP
+if conn == nil then
+.PP
+	error "mt.connect() failed"
+.PP
+end
+
+.PP
+-- send connection information
+.PP
+-- mt.negotiate() is called implicitly
+.PP
+if mt.conninfo(conn, "localhost", "127.0.0.1") ~= nil then
+.PP
+	error "mt.conninfo() failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.conninfo() unexpected reply"
+.PP
+end
+
+.PP
+-- send envelope macros and sender data
+.PP
+-- mt.helo() is called implicitly
+.PP
+mt.macro(conn, SMFIC_MAIL, "i", "test-id")
+.PP
+if mt.mailfrom(conn, "user@example.com") ~= nil then
+.PP
+	error "mt.mailfrom() failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.mailfrom() unexpected reply"
+.PP
+end
+
+-- send headers
+.PP
+-- mt.rcptto() is called implicitly
+.PP
+if mt.header(conn, "From", "user@example.com") ~= nil then
+.PP
+	error "mt.header(From) failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.header(From) unexpected reply"
+.PP
+end
+.PP
+if mt.header(conn, "Date", "Tue, 22 Dec 2009 13:04:12 \-0800") ~= nil then
+.PP
+	error "mt.header(Date) failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.header(Date) unexpected reply"
+.PP
+end
+.PP
+if mt.header(conn, "Subject", "Signing test") ~= nil then
+.PP
+	error "mt.header(Subject) failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.header(Subject) unexpected reply"
+.PP
+end
+.PP
+
+-- send EOH
+.PP
+if mt.eoh(conn) ~= nil then
+.PP
+	error "mt.eoh() failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.eoh() unexpected reply"
+.PP
+end
+
+.PP
+-- send body
+.PP
+if mt.bodystring(conn, "This is a test!\\r\\n") ~= nil then
+.PP
+	error "mt.bodystring() failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+.PP
+	error "mt.bodystring() unexpected reply"
+.PP
+end
+.PP
+
+.PP
+-- end of message; let the filter react
+.PP
+if mt.eom(conn) ~= nil then
+.PP
+	error "mt.eom() failed"
+.PP
+end
+.PP
+if mt.getreply(conn) ~= SMFIR_ACCEPT then
+.PP
+	error "mt.eom() unexpected reply"
+.PP
+end
+
+-- verify that a test header field got added
+.PP
+if not mt.eom_check(conn, MT_HDRINSERT, "Test-Header") then
+.PP
+	error "no header added"
+.PP
+end
+
+-- wrap it up!
+.PP
+mt.disconnect(conn)
+.PD
+.SH NOTES
+If a filter negotiates one of the SMFIP_NO* protocol option bits and a
+script attempts to perform one of those protocol steps, an error is returned.
+It is up to the test author to use
+.I mt.test_option()
+function to see if performing a protocol step has been explicitly disabled
+by the filter.
+.SH MILTER NOTES
+When
+.I mt.macro()
+is called, it replaces all previous macros of the same
+.I type
+with the ones provided in the argument list.  Thus, one call should be made
+that lists the complete set rather than one call per name-value pair.
+Also, as each stage in the milter process is executed, all macros corresponding
+stages after the current one are discarded.  For example, calling
+.I mt.helo(),
+which corresponds to SMFIC_HELO, will cause all prior macros of type
+SMFIC_MAIL and SMFIC_RCPT to be discarded as they represent a milter stage
+that comes later than SMFIC_HELO.
+
+Since the milter protocol and the internals of libmilter itself are not
+formally documented, there are myriad other subtleties of the milter protocol
+and implementation that are not documented here and may not be documented
+elsewhere, and could change without notice.  Caveat emptor.
+.SH VERSION
+This man page covers version 1.5.0 of
+.I miltertest.
+.SH COPYRIGHT
+Copyright (c) 2009-2014, The Trusted Domain Project.  All rights reserved.
+.SH SEE ALSO
+Milter -- http://www.milter.org
+.P
+Lua -- http://www.lua.org

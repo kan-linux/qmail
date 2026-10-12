@@ -1,0 +1,112 @@
+
+
+	     F E A T U R E S   F O R   F U T U R E   R E L E A S E
+
+
+INTRODUCTION
+============
+
+In the source code for this package may be one or more segments of code
+that are disabled, as they are slated for future release (FFR).  These
+are generally unreleased or incomplete features, or can be new algorithms
+for existing features.  They are often untested and currently unsupported,
+and generally formally become part of the released software in some future
+revision.  There may or may not be documentation for them outside of this
+file.  Use them at your own risk.
+
+To enable an FFR in the source code, specify "--enable-featurename" when
+executing "./configure".  For example, to add the "widget" feature, you would
+add "--enable-widget" when executing "./configure".
+
+
+FEATURES
+========
+
+Feature Name	Description
+
+allsymbols	By default, the build will attempt to create a libopendkim
+		that only exports symbols intended to be exported;
+		internal-only functions are not visible.  This feature
+		exports those as well.  This is intended only for running
+		library unit tests.  (libopendkim)
+
+atps		Support for experimental Authorized Third-Party Signatures
+		mechanism.  (opendkim, libopendkim)
+
+db_handle_pools	Database handle pools.  EXPERIMENTAL  (opendkim)
+
+default_sender	Allow declaration of sender address to use when a message
+		contains no obvious sender.  (opendkim)
+
+diffheaders	When verification fails for a message for which a "z="
+		tag was provided, compare the received headers to the original
+		headers to look for possible munging.  Requires the tre
+		library, available at http://laurikari.net/tre.
+		(opendkim, libopendkim)
+
+identity_header	Enable selection of an identity for signing based on the
+		value found in a particular header. (opendkim)
+
+ldap_caching	Adds code that ensures duplicate LDAP queries aren't sent
+		and local caching of LDAP replies is done.  Note that this
+		means changes made to LDAP data won't be recognized by
+		the filter right away. (opendkim)
+
+postgres_reconnect_hack
+		libpq (the postgresql client library) fails to identify
+		at least some error conditions as needing a connection
+		to be restarted before a query can be completed.  This
+		code compensates for that problem by checking for fatal
+		errors in ad different (but unconventional) manner.  It is
+		hoped that this can be removed in the near future.
+		(opendkim)
+
+rate_limit	Experimental rate limiting based on confirmed signer domains.
+		(opendkim)
+
+rbl		Option to query realtime blacklists from within Lua scripts.
+		Requires Lua.  (opendkim)
+
+replace_rules	Allow specification of a "replacement rules" table
+		for use when signing, replacing certain patterns in
+		address headers with specific strings to anticipate the
+		effects of such things as the "masquerade" and "genericstable"
+		features of the sendmail MTA.  (opendkim)
+
+reprrd		Support for collaborative reputation that uses rrdtool.
+		EXPERIMENTAL  (opendkim)
+
+reputation	Support for a collaborative reputation system.
+		EXPERIMENTAL  (opendkim)
+
+reputation_cache
+		Temporary caching of reputation replies to reduce round
+		trips to the reputation server.  EXPERIMENTAL (opendkim)
+
+resign		Experimental API features for simultaneous verifying and
+		re-signing of a single message.  (libopendkim, opendkim)
+
+sender_macro	Enable control over an MTA macro from which the address
+		of the sender is taken, rather than from header fields.
+		(opendkim)
+
+socketdb	Adds support for arbitrary socket-based data sets.  (opendkim)
+
+stats		Optional generation of per-message and per-signature
+		statistics of interest to the evolution of DKIM.
+		See stats/README for information.  (opendkim)
+
+statsext	Support for localized stats extensions.  See stats/README
+		for information.  (opendkim)
+
+vbr		Enable VBR (Vouch By Reference) header field addition
+		(outbound) and processing (inbound).  (opendkim)
+
+
+COPYRIGHT
+=========
+
+Copyright (c) 2009, Sendmail, Inc. and its suppliers.
+	All rights reserved.
+
+Copyright (c) 2009-2014, The Trusted Domain Project.  All rights reserved.

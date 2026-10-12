@@ -1,0 +1,225 @@
+			INSTALLING OPENDKIM
+
+OVERVIEW
+========
+
+In order to install the opendkim as a milter to an MTA you will need to
+perform the following steps:
+
+* Compile the opendkim program itself.
+
+* Configure the opendkim for signing and/or verification.
+
+* Install the opendkim and configure your MTA to use it.
+
+Note that there is a difference between "OpenDKIM" and "opendkim".
+"OpenDKIM" is a package containing a library, a filter and some tools to
+be used in testing your DKIM installation.  "opendkim" is the filter
+program contained in the "OpenDKIM" package.
+
+libopendkim is a library available as an API for programmers everywhere.  That
+API is described in a set of HTML files in the OpenDKIM source code
+package.
+
+The opendkim filter program incorporates the libopendkim library and works
+with recent versions of sendmail and Postfix or any other MTA that supports
+"milter".  For more information about milter, see <http://www.milter.org>.
+
+Sendmail is available at <http://www.sendmail.org> and Postfix is available
+at <http://www.postfix.org>.
+
+
+OPTIONAL PACKAGES
+=================
+
+OpenDKIM supports a few optional packages that can be included in the build
+to provide additional services.  A few of these become mandatory when
+enabling certain features below.  Specifying only the "--with-xxx" parameter
+to the "configure" command (described below) enables the package and makes a
+guess at where it might be installed on your system.  If the configure script
+doesn't find it, you will need to specify the location with
+"--with-xxx=location".
+
+--with-db	BerkeleyDB include file and library.  If enabled without
+		a specific path, the /usr/local/BerkeleyDB, /usr/local and
+		/usr directories will be searched for both the required
+		includes and the required libraries.  Required for the
+		following features: query_cache, stats
+
+--with-db-incdir
+--with-db-libdir
+--with-db-lib
+		These provide a finer control over the location of BerkeleyDB
+		include, library path and libary name where the default 
+		locations of --with-db are not enough.
+
+--with-domain	Specifies the local domain name in use.  Used only for
+		generation of sample configuration files, etc.
+
+--with-gcov
+		Compile with GNU code coverage enabled; the value provides the
+		location of the gprof libraries if not in the default location.
+
+--with-gprof
+		Compile with GNU profiling enabled; the value provides the
+		location of the gprof libraries if not in the default location.
+
+--with-lcov
+		Compile with Linux code coverage enabled; the value provides
+		the location of the gprof libraries if not in the default
+		location.
+
+--with-ldns
+		Location of the "ldns" library, required for unbound.
+
+--with-libcurl
+		Location of the curl library.  Required for reputation
+		query support.
+
+--with-libevent
+		Location of the event library.  Optional with unbound.
+
+--with-libgnutls
+		Location of GNU's TLS includes and library.
+		If not specified, "--with-openssl" is assumed.
+
+--with-libjansson
+		Location of the jansson JSON library.  Required for reputation
+		query support, unless "--with-libxml2" is also specified.
+
+--with-libmemcached
+		Location of the memcache library.  Enables the "memcache"
+		data set type.
+
+--with-libxml2	Location of the XML parser library.  Optional for use
+		with reputation query support.
+
+--with-lua	Lua interpreter library.  Enables fine-grained policy control
+		via Lua script hooks, and also enables building of the
+		"miltertest" test tool.
+
+--with-milter	Sendmail's "milter" include file and library.  Required
+		unless compilation of the filter is disabled (see below).
+		Enabled by default.
+
+--with-odbx	Location of the OpenDBX installation on your system.
+		Optional; enables use of a number of SQL and ODBC databases
+		for configuration information.  Version 1.3.7 or later is
+		required.
+
+--with-openldap	Location of the OpenLDAP installation on your system.
+
+--with-openssl	Location of the OpenSSL installation on your system.
+		Either this or libgcrypt required, and this one is assumed
+		if libgcrypt is not enabled.  If no specific location is
+		provided, several common install locations will be searched for
+		the required includes and libraries.
+
+--with-sasl	Location of the Cyrus SASL include file definitions. This is
+		used for authenticating against LDAP servers.
+
+--with-sql-backend
+		Names the SQL backend in use on your system.  The default
+		is "mysql".  See OpenDBX documentation for the list of
+		valid values.
+
+--with-tre	Location of the TRE installation on your system.  This
+		is required if you are using the "diffheaders" feature.
+		If no specific location is provided, the /usr/local and
+		/usr directories will be searched for the required includes
+		and libraries.
+
+--with-unbound	Location of the Unbound DNSSEC capable asynchronous resolver 
+		library and include file.
+                
+
+
+FEATURES
+========
+
+There are several compile-time features you may select.  Some of these
+are present but unsupported while others are fully-supported.  Read the
+FEATURES file for a description of the unsupported features.
+
+The supported features are as follows.  The can be turned on at compile
+time by adding "--enable-xxx" to the "configure" command line (described
+below), where "xxx" is the name of the feature.
+
+codecoverage	Compile the code such that executing it produces code
+		coverage and profiling output, used for code analysis.
+		Not intended for production use.
+
+debug		Produce debug-enabled libraries and executables.
+
+filter		Compile the opendkim filter.  Requires libmilter (see
+		"--with-milter" above).  This is on by default; if you
+		don't want the filter, specify "--disable-filter".
+
+live-testing	Enables unit tests that require live access to the Internet
+		to succeed.
+
+poll		Compile to use poll() instead of select() for asynchronous
+		I/O.
+
+popauth		Enables support for POP-before-SMTP checks.
+
+query_cache	Compile the opendkim library to support local caching of
+		replies.  (Requires libdb)
+
+rpath		Include library paths in generated binaries.
+
+
+COMPILING
+=========
+
+The opendkim filter requires either sendmail v8.13.0 or Postfix v2.3 or later
+for required milter protocol enhancements.
+
+To build this package you must first have installed or at least have available
+the OpenSSL package and libmilter.  The former is available from
+<http://www.openssl.org> or in package form from your vendor.  At a minimum
+version 0.9.8 is required to meet DKIM requirements.  The application library
+libmilter is part of the sendmail Open Source distribution and can be built
+and installed from there (ftp://ftp.sendmail.org).
+
+As Postfix currently does not provide milter library, you need to have
+sendmail sources or development package installed.  See
+http://www.postfix.org/MILTER_README.html
+
+You can view the configuration options with the following command:
+
+	./configure --help
+
+The commands shown below assume a UNIX system with standard build tools
+installed.
+
+Steps to compiling the library and the milter:
+
+(1) Download the source from OpenDKIM (http://www.opendkim.org).
+
+(2) Unpack the tarball:
+	tar -xzvf opendkim-<version>.tar.gz
+
+    Note: Use <version> as the version number that you downloaded.
+
+(3) Change directories to the release directory (opendkim-<version>) that
+    was created in step 2.
+	cd opendkim-<version>
+
+(4) Run the "configure" script to configure the package for your operating
+    system.
+	./configure
+
+(5) Compile the package.
+	make
+
+(6) Install the output of the build.  You probably need to become the
+    superuser to run this step.
+	make install
+
+
+CONFIGURING OPENDKIM
+====================
+
+The README document (in the opendkim directory) covers the installation and
+configuration of opendkim.
